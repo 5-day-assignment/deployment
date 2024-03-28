@@ -1,9 +1,8 @@
+# Before running the script use: Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
+# After running the script use: Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Default
+
 # Exit on error
 $ErrorActionPreference = 'Stop'
-
-$DEPLOYMENT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
-
-Set-Location $DEPLOYMENT_DIR\..
 
 if (-Not (Test-Path "rest-api-server")) {
     git clone https://github.com/5-day-assignment/rest-api-server.git
@@ -15,6 +14,5 @@ if (-Not (Test-Path "mobile-client")) {
     git clone https://github.com/5-day-assignment/mobile-client.git
 }
 
-Set-Location $DEPLOYMENT_DIR
-
 docker-compose up --build
+#docker-compose run --rm mobile-client

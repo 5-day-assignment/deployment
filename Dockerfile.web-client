@@ -1,0 +1,17 @@
+# Generate from OAS
+FROM openapitools/openapi-generator-cli as openapi-client-generator
+COPY ./rest-api-server/src/main/resources/openapi.yaml /openapi.yaml
+RUN openapi-generator-cli generate -i /openapi.yaml -g python -o /generated-client
+
+# Build final image
+FROM python:3.12-slim as python-env
+WORKDIR /app
+COPY --from=openapi-client-generator /generated-client ./openapi_client
+COPY flask_app/ ./flask_app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install ./openapi_client
+ENV FLASK_APP=flask_app
+ENV FLASK_ENV=development
+EXPOSE 5000
+CMD ["venv/bin/flask", "run", "--host=0.0.0.0"]

@@ -1,6 +1,8 @@
 *
 
-!/deployment/
-!/deployment/**
 !/.gitignore
+!/docker-compose.yml
+!/Dockerfile.*
 !/README.md
+!/setup.ps1
+!/setup.sh

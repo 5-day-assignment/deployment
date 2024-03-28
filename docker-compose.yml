@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  rest-api-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.rest-api-server
+    ports:
+      - "8080:8080"
+    container_name: um-rest-api-server
+
+  web-client:
+    build:
+      context: .
+      dockerfile: Dockerfile.web-client
+    ports:
+      - "5000:5000"
+    depends_on:
+      - rest-api-server
+
+  ### use `docker-compose run --rm mobile-client` when generating APK/IPA is needed instead
+  # mobile-client:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.mobile-client
+  #   volumes:
+  #     - ./mobile-client/build/outputs:/app/build/outputs
+  #   depends_on:
+  #     - rest-api-server
