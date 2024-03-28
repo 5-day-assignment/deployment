@@ -2,4 +2,5 @@
 
 !/deployment/
 !/deployment/**
-!.gitignore
+!/.gitignore
+!/README.md
