@@ -1,5 +1,11 @@
 # Build the JAR file
-FROM maven:3.8.4-openjdk-22-slim AS builder
+FROM maven:3.8.7-openjdk-18-slim AS builder
+RUN curl -L -o openjdk-22_linux-x64_bin.tar.gz https://download.java.net/java/GA/jdk22/830ec9fcccef480bb3e73fb7ecafe059/36/GPL/openjdk-22_linux-x64_bin.tar.gz \
+    && mkdir -p /usr/java \
+    && tar -xzf openjdk-22_linux-x64_bin.tar.gz -C /usr/java \
+    && rm openjdk-22_linux-x64_bin.tar.gz
+ENV JAVA_HOME=/usr/java/jdk-22
+ENV PATH="$JAVA_HOME/bin:${PATH}"
 COPY ./rest-api-server /usr/src/app
 WORKDIR /usr/src/app
 RUN mvn clean package
