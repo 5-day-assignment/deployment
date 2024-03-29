@@ -1,17 +1,34 @@
 # Generate from OAS
-FROM openapitools/openapi-generator-cli as openapi-client-generator
+
+# Note: This approach fails with a completely unexpected "openapi-generator-cli: not found".
+
+# FROM openapitools/openapi-generator-cli:latest as openapi-client-generator
+# WORKDIR /local
+# COPY ./rest-api-server/src/main/resources/openapi.yaml /local/openapi.yaml
+# RUN openapi-generator-cli generate -i /local/openapi.yaml -g python -o /local/web-client/openapi_client
+
+# Note: This approach succeeds at build, but there's an issue with the generated client.
+#       The issue seems to be known and might already be fixed with the v7.5.0 release.
+#       https://github.com/OpenAPITools/openapi-generator/issues/16086
+
+FROM openjdk:17-slim as openapi-client-generator
+RUN apt-get update && apt-get install -y curl maven jq
+RUN mkdir -p /opt/openapitools && \
+    curl https://raw.githubusercontent.com/OpenAPITools/openapi-generator/master/bin/utils/openapi-generator-cli.sh > /opt/openapitools/openapi-generator-cli && \
+    chmod u+x /opt/openapitools/openapi-generator-cli
+ENV PATH=$PATH:/opt/openapitools
 COPY ./rest-api-server/src/main/resources/openapi.yaml /openapi.yaml
 RUN openapi-generator-cli generate -i /openapi.yaml -g python -o /generated-client
 
 # Build final image
+
 FROM python:3.12-slim as python-env
 WORKDIR /app
 COPY --from=openapi-client-generator /generated-client ./openapi_client
-COPY flask_app/ ./flask_app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY ./web-client/flask_app/ ./flask_app
 RUN pip install ./openapi_client
-ENV FLASK_APP=flask_app
+RUN pip install Flask
+ENV FLASK_APP=flask_app/views.py
 ENV FLASK_ENV=development
 EXPOSE 5000
-CMD ["venv/bin/flask", "run", "--host=0.0.0.0"]
+CMD ["flask", "run", "--host=0.0.0.0"]
